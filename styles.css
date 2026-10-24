@@ -25,10 +25,12 @@ body {
   color: var(--green);
   font-family: var(--font);
   font-weight: 500;
+  overscroll-behavior: none;
 }
 
 body {
   min-height: 100dvh;
+  min-height: 100svh;
   overflow: hidden;
 }
 
@@ -85,7 +87,7 @@ img {
 }
 
 .screen {
-  width: min(100%, 402px);
+  width: 100%;
   height: 100%;
   flex: none;
   position: relative;
@@ -93,6 +95,12 @@ img {
   flex-direction: column;
   overflow: hidden;
   background: #fff;
+}
+
+@media (min-width: 541px) {
+  .screen {
+    width: min(100%, 402px);
+  }
 }
 
 .camera {
@@ -190,7 +198,7 @@ img {
 
 .apes {
   position: absolute;
-  top: 51.672px;
+  top: calc(16px + env(safe-area-inset-top));
   right: 16.115px;
   display: flex;
   flex-direction: column;
@@ -272,7 +280,7 @@ img {
   position: relative;
   z-index: 2;
   flex: none;
-  height: 204px;
+  height: calc(204px + env(safe-area-inset-bottom));
   background: var(--red);
   border-radius: 10px 10px 0 0;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
@@ -385,7 +393,7 @@ img {
 
 .flip {
   position: absolute;
-  left: 336.779px;
+  right: 17px;
   top: 144.912px;
   transform: translateY(-50%);
   width: 37px;

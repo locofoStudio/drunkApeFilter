@@ -100,14 +100,6 @@ function layoutState() {
   return "app";
 }
 
-function safariToolbarInset() {
-  const ios = /iPhone|iPod/.test(navigator.userAgent);
-  const standalone =
-    navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
-  if (!ios || standalone) return 0;
-  return 108;
-}
-
 function fitScreen() {
   const box = viewportBox();
   fit.style.top = `${box.top}px`;
@@ -117,7 +109,7 @@ function fitScreen() {
   fit.style.width = `${box.width}px`;
   fit.style.height = `${box.height}px`;
   screen.style.transform = "none";
-  fit.style.paddingBottom = `${safariToolbarInset()}px`;
+  fit.style.paddingBottom = "0";
 }
 
 function show(state) {
