@@ -66,6 +66,13 @@ let apeMorphs = [];
 let shapeWeights = {};
 let apeChoice = "al";
 let apeTicket = 0;
+const poseFilter = {
+  ready: false,
+  time: 0,
+  position: null,
+  quaternion: null,
+  scale: 0,
+};
 
 function viewportBox() {
   const viewport = window.visualViewport;
@@ -286,6 +293,7 @@ function stopTracking() {
   lastVideoTime = -1;
   smoothed = null;
   apeHasPose = false;
+  poseFilter.ready = false;
   if (apeRig) apeRig.visible = false;
   if (trackFrame) window.cancelAnimationFrame(trackFrame);
   trackFrame = 0;
@@ -491,30 +499,66 @@ function apeAnchors(root) {
   };
 }
 
-function landmarkPoint(landmarks, index) {
-  return landmarks[index];
+function midpoint(a, b) {
+  if (!a || !b) return a || b;
+  return {
+    x: (a.x + b.x) / 2,
+    y: (a.y + b.y) / 2,
+    z: (a.z + b.z) / 2,
+  };
 }
 
 function faceSamples(landmarks) {
-  const left = landmarkPoint(landmarks, landmarks.length > 468 ? 468 : 33);
-  const right = landmarkPoint(landmarks, landmarks.length > 473 ? 473 : 263);
+  const refined = landmarks.length > 473;
   return {
-    left,
-    right,
-    crown: landmarkPoint(landmarks, 10),
-    chin: landmarkPoint(landmarks, 152),
+    left: refined ? midpoint(landmarks[33], landmarks[133]) : landmarks[33],
+    right: refined ? midpoint(landmarks[263], landmarks[362]) : landmarks[263],
+    crown: landmarks[10],
+    nose: landmarks[2] || landmarks[168],
   };
 }
 
 function faceYaw(landmarks, width, height) {
-  const leftSide = landmarks[234];
-  const rightSide = landmarks[454];
+  const leftSide = midpoint(landmarks[234], landmarks[127]);
+  const rightSide = midpoint(landmarks[454], landmarks[356]);
   if (!leftSide || !rightSide) return 0;
   const side = viewPoint(leftSide, width, height).sub(viewPoint(rightSide, width, height));
   const flat = Math.hypot(side.x, side.y);
   if (flat < 1e-4) return 0;
   const yaw = Math.atan2(side.z, flat);
   return Math.max(-1.15, Math.min(1.15, yaw));
+}
+
+function poseAlpha(minCutoff, beta, speed, dt) {
+  const cutoff = minCutoff + beta * speed;
+  const tau = 1 / (2 * Math.PI * Math.max(0.001, cutoff));
+  return 1 / (1 + tau / dt);
+}
+
+function smoothPose(position, quaternion, scale) {
+  const now = performance.now();
+  if (!poseFilter.position) {
+    poseFilter.position = position.clone();
+    poseFilter.quaternion = quaternion.clone();
+  }
+  if (!poseFilter.ready) {
+    poseFilter.time = now;
+    poseFilter.position.copy(position);
+    poseFilter.quaternion.copy(quaternion);
+    poseFilter.scale = scale;
+    poseFilter.ready = true;
+    return { position: poseFilter.position, quaternion: poseFilter.quaternion, scale };
+  }
+  const dt = Math.min(0.1, Math.max(0.008, (now - poseFilter.time) / 1000));
+  poseFilter.time = now;
+  const moved = position.distanceTo(poseFilter.position);
+  poseFilter.position.lerp(position, poseAlpha(0.5, 0.012, moved / dt, dt));
+  const delta = poseFilter.quaternion.clone().invert().multiply(quaternion);
+  const angle = 2 * Math.acos(Math.min(1, Math.abs(delta.w)));
+  poseFilter.quaternion.slerp(quaternion, poseAlpha(0.7, 1.2, angle / dt, dt));
+  const scaleAlpha = poseAlpha(0.4, 0.0008, Math.abs(scale - poseFilter.scale) / dt, dt);
+  poseFilter.scale += (scale - poseFilter.scale) * scaleAlpha;
+  return { position: poseFilter.position, quaternion: poseFilter.quaternion, scale: poseFilter.scale };
 }
 
 function viewPoint(landmark, width, height) {
@@ -538,18 +582,18 @@ function resizeApeView(width, height) {
 
 function placeApe(landmarks, width, height) {
   const samples = faceSamples(landmarks);
-  if (!samples.left || !samples.right || !samples.crown || !samples.chin) return;
+  if (!samples.left || !samples.right || !samples.crown || !samples.nose) return;
   resizeApeView(width, height);
   const left = viewPoint(samples.left, width, height);
   const right = viewPoint(samples.right, width, height);
   const crown = viewPoint(samples.crown, width, height);
-  const chin = viewPoint(samples.chin, width, height);
+  const noseBase = viewPoint(samples.nose, width, height);
   const userX = left.clone().sub(right);
   userX.z = 0;
   const eyeSpan = Math.hypot(samples.left.x - samples.right.x, samples.left.y - samples.right.y);
   if (userX.lengthSq() < 1e-4 || eyeSpan < 0.02) return;
   userX.normalize();
-  const userY = crown.clone().sub(chin);
+  const userY = crown.clone().sub(noseBase);
   userY.addScaledVector(userX, -userY.dot(userX));
   if (userY.lengthSq() < 1e-4) return;
   userY.normalize();
@@ -576,18 +620,12 @@ function placeApe(landmarks, width, height) {
   const position = mid.sub(placed);
   position.addScaledVector(userZ, scale * 0.035);
 
+  const pose = smoothPose(position, quaternion, scale);
   apeRig.visible = true;
-  if (!apeHasPose) {
-    apeRig.position.copy(position);
-    apeRig.quaternion.copy(quaternion);
-    apeRig.scale.setScalar(scale);
-    apeHasPose = true;
-  } else {
-    apeRig.position.lerp(position, 0.55);
-    apeRig.quaternion.slerp(quaternion, 0.45);
-    const next = apeRig.scale.x + (scale - apeRig.scale.x) * 0.45;
-    apeRig.scale.setScalar(next);
-  }
+  apeRig.position.copy(pose.position);
+  apeRig.quaternion.copy(pose.quaternion);
+  apeRig.scale.setScalar(pose.scale);
+  apeHasPose = true;
   apeRenderer.render(apeScene, apeCamera);
 }
 
@@ -672,6 +710,7 @@ function paintMesh() {
     shapeWeights = {};
     applyFaceShapes(null);
     apeHasPose = false;
+    poseFilter.ready = false;
     if (apeRig) apeRig.visible = false;
     clearApe();
     return;
