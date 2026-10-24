@@ -1,0 +1,398 @@
+:root {
+  --red: #f16a6c;
+  --beige: #f5e9c7;
+  --green: #13423d;
+  --yellow: #fdb415;
+  --light-green: #a8d272;
+  --cream: #fbddac;
+  --ink: #595855;
+  --font: "Aktiv Grotesk", "AktivGrotesk-Medium", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #111;
+  color: var(--green);
+  font-family: var(--font);
+  font-weight: 500;
+}
+
+body {
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+img {
+  display: block;
+  max-width: none;
+}
+
+.gate {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 24px;
+  background: var(--red);
+}
+
+.gate-card {
+  width: min(100%, 320px);
+  background: var(--beige);
+  border-radius: 16px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.gate h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.gate p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.fit {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #111;
+}
+
+.screen {
+  width: min(100%, 402px);
+  height: 100%;
+  flex: none;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #fff;
+}
+
+.camera {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #fff;
+}
+
+.camera.is-mirror {
+  transform: scaleX(-1);
+}
+
+.mesh {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mesh.is-mirror {
+  transform: scaleX(-1);
+}
+
+.grab {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.flash.is-on {
+  animation: flash 180ms ease-out;
+}
+
+@keyframes flash {
+  from {
+    opacity: 0.9;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.top-bar {
+  display: none;
+}
+
+.stage {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.rec {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--green);
+  color: var(--yellow);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.rec i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
+.apes {
+  position: absolute;
+  top: 51.672px;
+  right: 16.115px;
+  display: flex;
+  flex-direction: column;
+  gap: 11.595px;
+  pointer-events: auto;
+}
+
+.ape {
+  width: 75.287px;
+  height: 75.287px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  border-radius: 6.957px;
+  background: var(--beige);
+  box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.ape.is-on {
+  background: var(--light-green);
+  border-color: var(--red);
+}
+
+.al-crop {
+  width: 60.235px;
+  height: 60.235px;
+  position: relative;
+  overflow: hidden;
+}
+
+.al-crop img {
+  position: absolute;
+  width: 59.698px;
+  height: 94.037px;
+  left: 0.269px;
+  top: -33.1px;
+}
+
+.dav {
+  width: 62.42px;
+  height: 61.588px;
+  object-fit: cover;
+}
+
+.notice {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: 270px;
+  margin: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--beige);
+  text-align: center;
+  pointer-events: auto;
+  box-shadow: -2px 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+.notice p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.notice button {
+  margin-top: 12px;
+  border: 0;
+  border-radius: 15px;
+  padding: 8px 16px;
+  background: var(--green);
+  color: var(--yellow);
+  font-size: 16px;
+}
+
+.controls {
+  position: relative;
+  z-index: 2;
+  flex: none;
+  height: 204px;
+  background: var(--red);
+  border-radius: 10px 10px 0 0;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.25);
+}
+
+.shutter {
+  position: absolute;
+  left: 50%;
+  top: 9.036px;
+  transform: translateX(-50%);
+  width: 87.392px;
+  height: 87.392px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: var(--green);
+  box-shadow: inset 0 0 7px rgba(0, 0, 0, 0.25);
+}
+
+.shutter:disabled {
+  opacity: 0.55;
+}
+
+.shutter-core {
+  width: 68.174px;
+  height: 68.174px;
+  border-radius: 7px;
+  background: var(--beige);
+  box-shadow:
+    inset 0 0 4px 1px rgba(0, 0, 0, 0.25),
+    0 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.shutter:active:not(:disabled) .shutter-core {
+  transform: scale(0.96);
+}
+
+.screen.is-recording .shutter-core {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--red);
+}
+
+.thumb {
+  position: absolute;
+  left: 17.221px;
+  top: 144.912px;
+  transform: translateY(-50%);
+  width: 53.558px;
+  height: 52.665px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: #d9d9d9;
+  overflow: hidden;
+}
+
+.thumb img {
+  width: 53.558px;
+  height: 52.665px;
+  object-fit: cover;
+}
+
+.thumb:disabled {
+  cursor: default;
+}
+
+.modes {
+  position: absolute;
+  left: 50%;
+  top: 144.912px;
+  transform: translate(-50%, -50%);
+  width: 205px;
+  height: 37px;
+  padding: 2.536px 4.023px;
+  display: flex;
+  align-items: center;
+  gap: 4.016px;
+  border-radius: 26px;
+  background: var(--cream);
+}
+
+.mode {
+  height: 31.927px;
+  padding: 0;
+  border: 0;
+  border-radius: 15.234px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 20.313px;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.mode[data-mode="video"] {
+  width: 92.469px;
+}
+
+.mode[data-mode="photo"] {
+  width: 100.469px;
+}
+
+.mode.is-on {
+  background: var(--green);
+  color: var(--yellow);
+}
+
+.flip {
+  position: absolute;
+  left: 336.779px;
+  top: 144.912px;
+  transform: translateY(-50%);
+  width: 37px;
+  height: 37px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
